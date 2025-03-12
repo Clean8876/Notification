@@ -159,7 +159,7 @@
 
 //     try {
 //       const response = await axios.post(
-//         'https://4c3c-115-246-219-84.ngrok-free.app/api/register',
+//         'https://081c-115-246-219-84.ngrok-free.app/api/register',
 //         { name, email, password },
 //         {
 //           headers: {
@@ -299,7 +299,7 @@ function Signup() {
 
     try {
       const response = await axios.post(
-        'https://4c3c-115-246-219-84.ngrok-free.app/api/register',
+        'https://081c-115-246-219-84.ngrok-free.app/api/register',
         {
           name: formData.fullName,
           email: formData.email,
@@ -317,7 +317,7 @@ function Signup() {
 
       if (response.status === 200) {
         setSuccessMessage("Signup successful! Redirecting...");
-        setTimeout(() => navigate("/login"), 1500);
+        setTimeout(() => navigate("/"), 1500);
       }
     } catch (error) {
       setErrorMessage(error.response?.data?.message || "Could not create an account. Please try again.");

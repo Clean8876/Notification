@@ -199,6 +199,7 @@ import { FaApple } from "react-icons/fa";
 import { GrFormView, GrFormViewHide } from "react-icons/gr";
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import api from '../Services/api';
 
 function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -209,30 +210,35 @@ function Login() {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
+    e.preventDefault(); // Prevent form submission
+    setLoading(true); // Show loading state
+    setError(null); // Clear any previous errors
+  
     try {
-      const response = await axios.post(
-        'https://4c3c-115-246-219-84.ngrok-free.app/api/login',
-        { email, password },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': 'true',
-            'Origin': window.location.origin
-          }
-        }
-      );
+      // Make the login API call
+      const response = await api.post('/api/login', { email, password });
+  
+      // Check if the response status is 200 and if the token exists
+      if (response.status === 200 && response.data?.data) {
+        console.log('Full response:', response);
+  
+        // Store the token in localStorage
+        localStorage.setItem('authToken', response.data.data.token);
+        localStorage.setItem('userInfo', response.data.data.name);
+        
 
-      if (response.status === 200) {
-        localStorage.setItem('authToken', response.data.token);
-        navigate('/home'); // Redirect to home after login
+  
+        // Redirect to the home page after successful login
+        navigate('/home');
+      } else {
+        throw new Error('Unexpected response format or missing token');
       }
     } catch (err) {
+      // Handle errors and display an appropriate message
+      console.error('Login error:', err);
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
+      // Reset loading state
       setLoading(false);
     }
   };
