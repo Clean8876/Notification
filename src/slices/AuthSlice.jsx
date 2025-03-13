@@ -1,74 +1,35 @@
-import { createSlice } from '@reduxjs/toolkit'
-import { registerUser, userLogin } from './authActions'
+import { createSlice } from '@reduxjs/toolkit';
 
-// initialize userToken from local storage
-const userToken = localStorage.getItem('token')
-  ? localStorage.getItem('token')
-  : null
-
+let storedUserData = localStorage.getItem("userInfo");
+let parsedUserData = null;
+try {
+  parsedUserData = storedUserData ? JSON.parse(storedUserData) : null;
+} catch (error) {
+  console.error("Error parsing userInfo from localStorage:", error);
+  // Optionally clear the invalid data:
+  localStorage.removeItem("userInfo");
+}
 const initialState = {
-  loading: false,
-  userInfo: null,
-  userToken,
-  error: null,
-  success: false, // Added 'success' state for registration
+  user: parsedUserData,
+  isAuthenticated: false,
 };
 
 const authSlice = createSlice({
-  name: 'auth', // Renamed from 'user' to 'auth' for clarity
+  name: 'auth',
   initialState,
   reducers: {
+    login: (state, action) => {
+      state.user = action.payload;
+      state.isAuthenticated = true;
+    },
     logout: (state) => {
-      localStorage.removeItem('userToken')
-      state.loading = false
-      state.userInfo = null
-      state.userToken = null
-      state.error = null
-      state.success = false; // Reset success on logout as well
+      state.user = null;
+      state.isAuthenticated = false;
     },
-    setCredentials: (state, { payload }) => {
-      state.userInfo = payload
-    },
-    clearSuccess: (state) => { // Added reducer to clear success state
-      state.success = false;
-    },
-    clearError: (state) => { // Added reducer to clear error state
-      state.error = null;
-    }
   },
-  extraReducers: (builder) => {
-    builder
-      // register user
-      .addCase(registerUser.pending, (state) => {
-        state.loading = true
-        state.error = null
-        state.success = false; // Reset success on new registration attempt
-      })
-      .addCase(registerUser.fulfilled, (state) => { // Payload not used here as registration may not return data
-        state.loading = false
-        state.success = true // registration successful
-      })
-      .addCase(registerUser.rejected, (state, { payload }) => {
-        state.loading = false
-        state.error = payload
-        state.success = false; // Reset success on registration failure
-      })
-      // login user (existing reducers - no changes needed)
-      .addCase(userLogin.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
-      .addCase(userLogin.fulfilled, (state, { payload }) => {
-        state.loading = false
-        state.userInfo = payload
-        state.userToken = payload.userToken
-      })
-      .addCase(userLogin.rejected, (state, { payload }) => {
-        state.loading = false
-        state.error = payload
-      });
-  },
-})
+});
 
-export const { logout, setCredentials, clearSuccess, clearError } = authSlice.actions; // Export new actions
-export default authSlice.reducer
+export const { login, logout } = authSlice.actions;
+export const selectUser = (state) => state.auth.user;
+export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
+export default authSlice.reducer;

@@ -149,8 +149,12 @@ import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import api from '../Services/api';
+import { selectUser,selectIsAuthenticated } from '../slices/AuthSlice';
+import { useSelector } from 'react-redux';
 
 function SendNotification() {
+  const user = useSelector(selectUser);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const [formData, setFormData] = useState({
     projectId: '',
     title: '',
@@ -194,8 +198,7 @@ function SendNotification() {
       // Make sure the API endpoint below matches your backend endpoint.
       const response = await api.post('/api/immediateSend', formData);
       
-      // Check if the response indicates success
-      if (response.data?.success) {
+      if (response.status === 200) {
         toast.success("Notification sent Successfully", {
           position: "top-center",
           autoClose: 3000,
@@ -217,7 +220,8 @@ function SendNotification() {
         console.error("Notification response error:", response.data);
       }
     } catch (error) {
-      console.error("API Error:", error);
+      // Log additional error info if available
+      console.error("API Error:", error.response || error.message || error);
       toast.error("Failed to send notification");
     }
   };
@@ -233,9 +237,12 @@ function SendNotification() {
     <div>
       <ToastContainer />
       <div className="bg-white shadow-md rounded-[20px] p-8 max-w-sm w-full">
-        <h2 className="text-2xl font-bold text-center mb-6 text-primaryButton font-Poppins">
-          Hey {storedUserData}
-        </h2>
+      {isAuthenticated && (
+  <h2 className="text-2xl font-bold text-center mb-6 text-primaryButton font-Poppins">
+    Hey {user?.user.name}
+  </h2>
+)}
+       
         <form onSubmit={handleSubmit} className="space-y-4">
   {/* Project ID Dropdown */}
   <div>

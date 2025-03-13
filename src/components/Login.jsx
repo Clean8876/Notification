@@ -198,7 +198,8 @@ import { FaGoogle, FaFacebook } from "react-icons/fa6";
 import { FaApple } from "react-icons/fa";
 import { GrFormView, GrFormViewHide } from "react-icons/gr";
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { login } from '../slices/AuthSlice'
 import api from '../Services/api';
 
 function Login() {
@@ -208,37 +209,42 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const handleLogin = async (e) => {
-    e.preventDefault(); // Prevent form submission
-    setLoading(true); // Show loading state
-    setError(null); // Clear any previous errors
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
   
     try {
-      // Make the login API call
       const response = await api.post('/api/login', { email, password });
-  
-      // Check if the response status is 200 and if the token exists
+      
       if (response.status === 200 && response.data?.data) {
-        console.log('Full response:', response);
+        // Extract user data from response
+        const { token, name, email } = response.data.data;
   
-        // Store the token in localStorage
-        localStorage.setItem('authToken', response.data.data.token);
-        localStorage.setItem('userInfo', response.data.data.name);
+        // Store token in localStorage
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('userInfo', JSON.stringify(response.data.data));
+        console.log(response.data.data)
         
-
+        // Dispatch login action with user data
+        dispatch(login({ 
+          user: { 
+            name, 
+            email 
+          },
+          token
+        }));
   
-        // Redirect to the home page after successful login
+        // Redirect to home
         navigate('/home');
       } else {
-        throw new Error('Unexpected response format or missing token');
+        throw new Error('Unexpected response format');
       }
     } catch (err) {
-      // Handle errors and display an appropriate message
       console.error('Login error:', err);
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
-      // Reset loading state
       setLoading(false);
     }
   };
