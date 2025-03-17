@@ -153,7 +153,7 @@
     // export default MultiDatePicker;
 
 
-    import React, { useState } from "react";
+import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -280,36 +280,43 @@ const MultiDatePicker = ({ setScheduledTimes }) => {
         </div>
       </div>
       {dates.length > 0 && (
-        <div className="border-t border-gray-100 p-6">
-          <h2 className="text-lg font-medium mb-4 text-gray-800">Your Schedule</h2>
-          <ul className="space-y-2">
-            {dates.map((date, index) => (
-              <li
-                key={index}
-                className="flex justify-between items-center px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-150"
-              >
-                <div>
-                  <div className="font-medium">
-                    {date.toLocaleDateString(undefined, {
-                      weekday: "short",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </div>
-                  <div className="text-sm text-gray-500">{formatTime(date)}</div>
-                </div>
-                <button
-                  onClick={() => handleRemoveDate(index)}
-                  className="text-gray-400 hover:text-red-500 focus:outline-none p-1 rounded-full hover:bg-gray-200 transition-colors duration-150"
-                  aria-label="Remove date"
-                >
-                  ✖️
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+  <div className="border-t border-gray-100 p-6">
+    <h2 className="text-lg font-medium mb-4 text-gray-800">Your Schedule (UTC)</h2>
+    <ul className="space-y-2">
+      {dates.map((date, index) => (
+        <li
+          key={index}
+          className="flex justify-between items-center px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-150"
+        >
+          <div>
+            <div className="font-medium">
+              {date.toLocaleDateString(undefined, {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                timeZone: 'UTC'
+              })}
+            </div>
+            <div className="text-sm text-gray-500">
+              {date.toLocaleTimeString(undefined, {
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: 'UTC'
+              })} 
+            </div>
+          </div>
+          <button
+            onClick={() => handleRemoveDate(index)}
+            className="text-gray-400 hover:text-red-500 focus:outline-none p-1 rounded-full hover:bg-gray-200 transition-colors duration-150"
+            aria-label="Remove date"
+          >
+            ✖️
+          </button>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
     </div>
   );
 };
