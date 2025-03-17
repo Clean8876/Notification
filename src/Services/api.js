@@ -1,7 +1,8 @@
 import axios from 'axios';
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
-  baseURL: 'https://6523-115-246-219-84.ngrok-free.app',
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
             'ngrok-skip-browser-warning': 'true',
@@ -30,3 +31,6 @@ export default api;
 //     SIGNIN_API:BASE_URL+"/api/login",
     
 // }
+
+
+

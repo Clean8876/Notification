@@ -266,6 +266,7 @@ import { FaGoogle, FaFacebook } from "react-icons/fa6";
 import { FaApple } from "react-icons/fa";
 import { GrFormView, GrFormViewHide } from "react-icons/gr";
 import axios from 'axios';
+import api from '../Services/api';
 
 function Signup() {
   const navigate = useNavigate();
@@ -298,8 +299,8 @@ function Signup() {
     setSuccessMessage('');
 
     try {
-      const response = await axios.post(
-        'https://081c-115-246-219-84.ngrok-free.app/api/register',
+      const response = await api.post(
+        '/api/register',
         {
           name: formData.fullName,
           email: formData.email,
