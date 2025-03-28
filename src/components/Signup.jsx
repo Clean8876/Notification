@@ -267,6 +267,8 @@ import { FaApple } from "react-icons/fa";
 import { GrFormView, GrFormViewHide } from "react-icons/gr";
 import axios from 'axios';
 import api from '../Services/api';
+import { login } from '../slices/AuthSlice';
+import { useDispatch } from 'react-redux';
 
 function Signup() {
   const navigate = useNavigate();
@@ -275,58 +277,116 @@ function Signup() {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch()
+  const [errors, setErrors] = useState({ 
+    fullName: '', 
+    email: '', 
+    password: '', 
+    confirmPassword: '' 
+  });
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
   });
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'Full name is required';
+    }
 
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Enter a valid email address';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Confirm password is required';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
   const handleOnChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear specific field error and general message on change
+    setErrors(prev => ({ ...prev, [name]: '' }));
+    setErrorMessage('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
-      setErrorMessage("Passwords do not match");
-      return;
-    }
-
+    if (!validate()) return;
+  
     setLoading(true);
     setErrorMessage('');
     setSuccessMessage('');
-
+  
     try {
-      const response = await api.post(
-        '/api/register',
-        {
-          name: formData.fullName,
+      // Step 1: Register the user
+      const registerResponse = await api.post('/api/register', {
+        name: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword
+      });
+  
+      console.log("Registration Response:", registerResponse);
+  
+      if (registerResponse.status === 200 || registerResponse.status === 201) { 
+        setSuccessMessage("Signup successful! Logging in...");
+  
+        // Step 2: Immediately try logging in
+        const loginResponse = await api.post('/api/login', {
           email: formData.email,
           password: formData.password,
-          confirmPassword: formData.confirmPassword
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': 'true',
-            'Origin': window.location.origin
-          }
+        });
+  
+        console.log("Login Response:", loginResponse);
+  
+        if (loginResponse.status === 200 && loginResponse.data?.data) {
+          const { token, name, email, apps } = loginResponse.data.data;
+  
+          // Store token and user data
+          localStorage.setItem('authToken', token);
+          localStorage.setItem('userInfo', JSON.stringify(loginResponse.data.data));
+  
+          // Dispatch login action
+          dispatch(login({
+            user: { name, email, apps },
+            token
+          }));
+  
+          // Redirect based on user's apps/projects
+          setTimeout(() => {
+            if (!apps || apps.length === 0) {
+              navigate('/Home');
+            } else {
+              navigate('/SendNotification');
+            }
+          }, 1000);
+        } else {
+          throw new Error('Unexpected login response format');
         }
-      );
-
-      if (response.status === 200) {
-        setSuccessMessage("Signup successful! Redirecting...");
-        setTimeout(() => navigate("/"), 1500);
+      } else {
+        throw new Error(registerResponse.data?.message || "Could not register user.");
       }
     } catch (error) {
+      console.error("Error during signup/login:", error);
       setErrorMessage(error.response?.data?.message || "Could not create an account. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="flex justify-center items-center min-h-screen">
       <div className="bg-white shadow-md rounded-[20px] p-8 max-w-sm w-full">
@@ -338,27 +398,32 @@ function Signup() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Full Name */}
-          <input
-            type="text"
-            name="fullName"
-            placeholder="Full Name"
-            required
-            value={formData.fullName}
-            onChange={handleOnChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 font-Poppins"
-          />
+          <div>
+            <input
+              type="text"
+              name="fullName"
+              placeholder="Full Name"
+              value={formData.fullName}
+              onChange={handleOnChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 font-Poppins"
+            />
+            {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
+          </div>
+
 
           {/* Email */}
-          <input
-            type="email"
-            name="email"
-            placeholder="Email Address"
-            required
-            value={formData.email}
-            onChange={handleOnChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 font-Poppins"
-          />
-
+          <div>
+            <input
+              type="email"
+              name="email"
+              placeholder="Email Address"
+              value={formData.email}
+              onChange={handleOnChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 font-Poppins"
+            />
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+          </div>
+          
           {/* Password */}
           <div className="relative">
             <input
@@ -377,6 +442,7 @@ function Signup() {
             >
               {showPassword ? <GrFormView size={20} /> : <GrFormViewHide size={20} />}
             </button>
+            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
           </div>
 
           {/* Confirm Password */}
@@ -397,6 +463,7 @@ function Signup() {
             >
               {showPassword1 ? <GrFormView size={20} /> : <GrFormViewHide size={20} />}
             </button>
+            {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
           </div>
 
           {/* Submit Button */}
@@ -411,7 +478,7 @@ function Signup() {
 
         <p className="mt-4 text-center text-sm text-gray-600 font-Poppins">
           Already have an account?{' '}
-          <a href="/login" className="text-primaryButton hover:underline">Login here</a>
+          <a href="/" className="text-primaryButton hover:underline">Login here</a>
         </p>
 
         {/* Social Logins */}

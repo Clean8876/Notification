@@ -156,12 +156,21 @@
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useEffect } from "react";
 
-const MultiDatePicker = ({ setScheduledTimes }) => {
+const MultiDatePicker = ({ scheduledTimes, setScheduledTimes }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [dates, setDates] = useState([]);
   const [error, setError] = useState(null);
+
+
+  useEffect(() => {
+    // ✅ Reset dates whenever scheduledTimes is reset in the parent
+    if (scheduledTimes.length === 0) {
+      setDates([]);
+    }
+  }, [scheduledTimes]);
 
   const generateTimeOptions = () => {
     const options = [];
@@ -174,7 +183,10 @@ const MultiDatePicker = ({ setScheduledTimes }) => {
     }
     return options;
   };
-
+  useEffect(() => {
+    setSelectedTime(null);  // ✅ Reset time when the date changes
+  }, [selectedDate]);
+  const now = new Date();  
   const handleAddDate = () => {
     if (selectedDate && selectedTime) {
       // Combine local date and time
@@ -205,9 +217,15 @@ const MultiDatePicker = ({ setScheduledTimes }) => {
       }
   
       // Update state with UTC time
-      setDates([...dates, utcDateTime]);
-      setScheduledTimes([...dates, utcDateTime]);
+      setDates((prevDates) => {
+        const updatedDates = [...prevDates, utcDateTime];
+        setScheduledTimes(updatedDates); // Ensures consistency
+        return updatedDates;
+      });
       setError(null);
+    // ✅ Reset date and time picker after adding
+    setSelectedDate(null);
+    setSelectedTime(null);
     }
   };
 
@@ -220,14 +238,17 @@ const MultiDatePicker = ({ setScheduledTimes }) => {
   const formatTime = (date) => {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
-
+  const handleClearDates = () => {
+    setDates([]); // Clear dates in this component
+    setScheduledTimes([]); // Update the parent component's state
+  };
   const timeOptions = generateTimeOptions();
 
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden">
-      <div className="p-6">
+      <div className="p-2">
         <div className="space-y-4">
-          <div>
+          <div >
             <label
               htmlFor="datePicker"
               className="block text-sm font-medium text-gray-700 mb-1"
@@ -239,20 +260,20 @@ const MultiDatePicker = ({ setScheduledTimes }) => {
               onChange={(date) => setSelectedDate(date)}
               dateFormat="MMMM d, yyyy"
               placeholderText="Select a date"
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
+              className="w-full px-10 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
               showMonthDropdown
               showYearDropdown
               dropdownMode="select"
               id="datePicker"
               aria-label="Select date"
+              minDate={now}
             />
-          </div>
-          <div>
+          
             <label
               htmlFor="timePicker"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Time
+              Time 
             </label>
             <DatePicker
               selected={selectedTime}
@@ -263,13 +284,17 @@ const MultiDatePicker = ({ setScheduledTimes }) => {
               timeCaption="Time"
               dateFormat="h:mm aa"
               placeholderText="Select a time"
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
+              className="w-full px-10 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
               id="timePicker"
               aria-label="Select time"
-            />
+              disabled={!selectedDate}  // ✅ Disable until a date is selected
+              minTime={selectedDate?.toDateString() === now.toDateString() ? now : new Date(0, 0, 0, 0, 0, 0)}
+              maxTime={new Date(0, 0, 0, 23, 59, 59)}
+              />
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <button
+            type="button"  //  Prevents form submission
             onClick={handleAddDate}
             disabled={!selectedDate || !selectedTime}
             className="w-full py-3 mt-2 bg-primaryButton text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -280,42 +305,42 @@ const MultiDatePicker = ({ setScheduledTimes }) => {
         </div>
       </div>
       {dates.length > 0 && (
-  <div className="border-t border-gray-100 p-6">
-    <h2 className="text-lg font-medium mb-4 text-gray-800">Your Schedule (UTC)</h2>
-    <ul className="space-y-2">
-      {dates.map((date, index) => (
-        <li
-          key={index}
-          className="flex justify-between items-center px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-150"
-        >
-          <div>
-            <div className="font-medium">
-              {date.toLocaleDateString(undefined, {
-                weekday: "short",
-                month: "short",
-                day: "numeric",
-                timeZone: 'UTC'
-              })}
-            </div>
-            <div className="text-sm text-gray-500">
-              {date.toLocaleTimeString(undefined, {
-                hour: '2-digit',
-                minute: '2-digit',
-                timeZone: 'UTC'
-              })} 
-            </div>
-          </div>
-          <button
-            onClick={() => handleRemoveDate(index)}
-            className="text-gray-400 hover:text-red-500 focus:outline-none p-1 rounded-full hover:bg-gray-200 transition-colors duration-150"
-            aria-label="Remove date"
-          >
-            ✖️
-          </button>
-        </li>
-      ))}
-    </ul>
-  </div>
+        <div className="border-t border-gray-100 p-6">
+          <h2 className="text-lg font-medium mb-4 text-gray-800">Your Schedule (UTC)</h2>
+          <ul className="space-y-2">
+            {dates.map((date, index) => (
+              <li
+                key={index}
+                className="flex justify-between items-center px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-150"
+              >
+                <div>
+                  <div className="font-medium">
+                    {date.toLocaleDateString(undefined, {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                      timeZone: 'UTC'
+                    })}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {date.toLocaleTimeString(undefined, {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      timeZone: 'UTC'
+                    })} 
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleRemoveDate(index)}
+                  className="text-gray-400 hover:text-red-500 focus:outline-none p-1 rounded-full hover:bg-gray-200 transition-colors duration-150"
+                  aria-label="Remove date"
+                >
+                  ✖️
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
 )}
     </div>
   );

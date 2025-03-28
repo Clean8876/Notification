@@ -1,43 +1,118 @@
 
 import api from '../Services/api';
 import React, { useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { login } from '../slices/AuthSlice';
+import { updateUserApps } from '../slices/AuthSlice';
+
+
 
 
 function Home() {
   const navigate = useNavigate();
   const [projectId, setProjectId] = useState('');
   const [error, setError] = useState('');
+  const dispatch = useDispatch(); 
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) throw new Error('No authentication token found');
+      // const token = localStorage.getItem('authToken');
+      // if (!token) throw new Error('No authentication token found');
   
-      const response = await api.post( // Capture the response
-        '/api/addProjectIds',
-        { apps: [projectId] }
-      );
+      // const response = await api.post( // Capture the response
+      //   '/api/addProjectIds',
+      //   { apps: [projectId] }
+      // );
   
-      // Log success details
-      console.info('Project ID created successfully:', {
-        status: response.status,
-        data: response.data,
-        projectId: projectId,
-        timestamp: new Date().toISOString()
-      });
-  
-      if (response.data) {
-        console.log('Server response:', {
-          createdIds: response.data.createdIds,
-          message: response.data.message
-        });
-      } else {
-        console.warn('No data received in response');
+
+      // if (response.data) {
+      //   if (response.data.success) {
+      //     const projectIds = response.data.data; // This is your array of project IDs
+
+      //     // Update localStorage
+      //     const currentUserInfo = JSON.parse(localStorage.getItem('userInfo'));
+      //     const updatedUserInfo = {
+      //       ...currentUserInfo,
+      //       user: {
+      //         ...currentUserInfo.user,
+      //         apps: projectIds // Update the apps array with project IDs
+      //       }
+      //     };
+      //     localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo));
+
+      //     // Update Redux state
+      //     dispatch(updateUserApps(
+            
+      //       projectIds
+      //     ));
+
+      //     navigate('/SendNotification');
+      //   }
+      // } else {
+      //   console.warn('No data received in response');
+      // }
+       // Make the API request
+  const response = await api.post('/api/addProjectIds', { apps: [projectId] });
+
+  // Check if response.data exists and the API call was successful
+  if (response.data && response.data.success) {
+    console.log("Full API Response:", response.data); // Debugging Log
+
+    let projectIds = [];
+
+    // Extract project IDs from the malformed response
+    if (typeof response.data.data === "string") {
+      // Use regex to extract array content
+      const match = response.data.data.match(/\[([^\]]+)\]/);
+      if (match) {
+        projectIds = match[1].split(",").map(id => id.trim()); // Convert to array
       }
+    } else if (response.data.data && Array.isArray(response.data.data.apps)) {
+      projectIds = response.data.data.apps;
+    }
+
+    // Validate extracted projectIds
+    if (!Array.isArray(projectIds) || projectIds.length === 0) {
+      console.error("Received invalid or empty projectIds:", projectIds);
+      return;
+    }
+
+    // Process localStorage update
+    let currentUserInfo = {};
+    try {
+      const storedUserInfo = localStorage.getItem("userInfo");
+      currentUserInfo = storedUserInfo ? JSON.parse(storedUserInfo) : {};
+    } catch (error) {
+      console.error("Error parsing userInfo from localStorage:", error);
+    }
+
+    if (!currentUserInfo.user) {
+      currentUserInfo.user = {};
+    }
+
+    const updatedUserInfo = {
+      ...currentUserInfo,
+      user: {
+        ...currentUserInfo.user,
+        apps: projectIds,
+      },
+    };
+
+    localStorage.setItem("userInfo", JSON.stringify(updatedUserInfo));
+
+    // Update Redux state
+    dispatch(updateUserApps(projectIds));
+
+    navigate("/SendNotification");
+  } else {
+    console.error("API call was unsuccessful:", response.data);
+  }
   
-      navigate('/SendNotification');
     } catch (err) {
       // Enhanced error logging
       console.error('Project ID submission failed:', {

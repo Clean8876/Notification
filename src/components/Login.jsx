@@ -9,25 +9,54 @@ import { useDispatch } from 'react-redux';
 import { login } from '../slices/AuthSlice'
 import api from '../Services/api';
 
+
+
 function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [apiError, setApiError] = useState('');
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [errors, setErrors] = useState({ email: '', password: '' });
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+
+  const validate = () => {
+    const newErrors = {};
+    if (!email) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Enter a valid email address";
+    }
+
+    if (!password) {
+      newErrors.password = "Password is required";
+    }
+
+    setErrors(newErrors);
+
+    // If no errors, form is valid
+    return Object.keys(newErrors).length === 0;
+  };
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    setApiError(''); 
+    
   
+  const isValid = validate();
+  
+  if (!isValid) {
+    setLoading(false);
+    return; // Stop if validation fails
+  }
     try {
       const response = await api.post('/api/login', { email, password });
       
       if (response.status === 200 && response.data?.data) {
         // Extract user data from response
-        const { token, name, email } = response.data.data;
+        const { token, name, email,apps } = response.data.data;
   
         // Store token in localStorage
         localStorage.setItem('authToken', token);
@@ -38,22 +67,32 @@ function Login() {
         dispatch(login({ 
           user: { 
             name, 
-            email 
+            email,
+            apps
           },
           token
         }));
   
         // Redirect to home
-        navigate('/home');
+        // Check if apps array exists and has valid projects
+      if (!apps || apps.length === 0) {
+        navigate('/Home'); // Redirect to Home if no projects
+      } else {
+        navigate('/SendNotification'); // Redirect to SendNotification if has projects
+      }
       } else {
         throw new Error('Unexpected response format');
       }
     } catch (err) {
-      console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
-    } finally {
-      setLoading(false);
+      const errorMessage = err.response?.data?.message || 'Login failed. Please check your credentials.';
+      setApiError(errorMessage);
     }
+     finally {
+      setLoading(false);
+      
+    }
+  
+   
   };
 
   return (
@@ -63,7 +102,7 @@ function Login() {
           Login here
         </h2>
 
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        {apiError && <p className="text-red-500 text-center mb-4">{apiError}</p>}
 
         <form className="space-y-4" onSubmit={handleLogin}>
           {/* Email Input */}
@@ -78,6 +117,7 @@ function Login() {
               required
               className="mt-1 block w-full font-Poppins px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
+            {errors.email && <p style={{ color: "red" }}>{errors.email}</p>}
           </div>
 
           {/* Password Input */}
@@ -99,6 +139,7 @@ function Login() {
             >
               {showPassword ? <GrFormView size={20} /> : <GrFormViewHide size={20} />}
             </button>
+            {errors.password && <p style={{ color: "red" }}>{errors.password}</p>}
           </div>
 
           {/* Forgot Password */}
