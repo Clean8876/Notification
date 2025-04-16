@@ -3,6 +3,7 @@ import authReducer from '../slices/AuthSlice';
 import projectReducer from '../slices/ProjectidSlice'
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
+import stepperReducer from '../slices/StepperSlice';
 
 
 
@@ -17,6 +18,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
   auth: authReducer,
   project:projectReducer,
+  stepper:stepperReducer
 });
 // Create a persisted reducer
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -7,9 +7,18 @@ import { BrowserRouter } from 'react-router-dom';
 import { PersistGate } from 'redux-persist/integration/react';
 import { Provider } from 'react-redux';
 import { store,persistor } from './Services/Store.js';
+import { ProjectProvider } from './context/ProjectContext.jsx';
+
+
+const clientId = "1019189497719-6oo2tdmhueq2pjne3cikrnttms0ug0ra.apps.googleusercontent.com";
+
+
+ 
+
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
+    <ProjectProvider>
      <Provider store={store}>
      <PersistGate loading={null} persistor={persistor}>
     <BrowserRouter>
@@ -17,6 +26,6 @@ createRoot(document.getElementById('root')).render(
     
     </BrowserRouter>
     </PersistGate>
-    </Provider>
+    </Provider></ProjectProvider>
   </StrictMode>,
 )
