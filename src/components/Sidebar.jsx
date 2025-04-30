@@ -53,7 +53,7 @@ const Sidebar = () => {
 
         <nav className="p-4 space-y-2">
         <NavLink 
-            to="/dashboard/" 
+            to="/dashboard/projects/" 
             className={({ isActive }) => 
               `block px-4 py-3 rounded-md transition-colors ${
                 isActive 
@@ -63,8 +63,22 @@ const Sidebar = () => {
             }
             onClick={() => setIsOpen(false)}
           >
-            Dashboard
+            Projects
           </NavLink>
+          <NavLink 
+              to="/dashboard" 
+              end // Add this prop
+              className={({ isActive }) => 
+                `block px-4 py-3 rounded-md transition-colors ${
+                  isActive 
+                    ? 'bg-blue-600 font-medium text-white' 
+                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                }`
+              }
+              onClick={() => setIsOpen(false)}
+            >
+              Dashboard
+            </NavLink>
           <NavLink 
             to="/dashboard/sendNotification" 
             className={({ isActive }) => 

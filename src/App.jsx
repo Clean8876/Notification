@@ -145,6 +145,10 @@ import Dashboard from './components/Dashboard';
 import JsonUpload from './components/JsonUpload';
 import Stepper from './components/Stepper';
 import DashboardSteps from './components/DashboardSteps';
+import showProject from './Pages/showProject';
+import Card from './components/Bucket';
+import SetupEmail from './Pages/SetupEmail';
+import SendMail from './Pages/SendMail';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requireProject = false }) => {
@@ -152,7 +156,7 @@ const ProtectedRoute = ({ children, requireProject = false }) => {
   const user = useSelector(selectUser);
 
   if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   if (requireProject && (!user?.user?.apps || user?.user?.apps.length === 0)) {
@@ -222,7 +226,7 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route 
-          path="/" 
+          path="/login" 
           element={
             <PublicRoute>
               <div className="w-full max-w-md mx-auto px-4">
@@ -231,6 +235,7 @@ function App() {
             </PublicRoute>
           } 
         />
+      
         <Route 
           path="/signup" 
           element={
@@ -252,11 +257,14 @@ function App() {
           }
         >
           <Route index element={<Dashboard />} />
+          <Route path='projects' element={<Card/>}/>
           <Route path="dash" element={<Dashboard />} />
           <Route path="sendNotification" element={<SendNotification />} />
           <Route path="AddProject" element={<DashboardSteps />} />
           <Route path="dashboardSteps" element={<Stepper />} />
         </Route>
+        <Route path='/mail' element ={<SetupEmail/>}/>
+        <Route path='/sendMail' element ={<SendMail/>}/>
 
         {/* Default Redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />

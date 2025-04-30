@@ -9,7 +9,7 @@ const Stepper = ({ children }) => {
   return (
     // Provide the step data to all children within this block.
     <StepperProvider totalSteps={totalSteps}>
-      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 md:px-8">
+      <div className="my-4 sm:my-6 w-full flex-grow flex flex-col">
         <div className="mb-8 md:mb-12">  
           <StepIndicator />
         </div>
@@ -143,8 +143,8 @@ const StepsContainer = ({ children }) => {
   // Convert children into an array to safely pick one.
   const stepsArray = React.Children.toArray(children);
   return (
-    <div className="my-4 sm:my-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-6">
+    <div className="my-4 sm:my-6 w-full">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-6 w-full">
         {stepsArray[currentStep]}
       </div>
     </div>

@@ -1,28 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { GrFormView, GrFormViewHide } from "react-icons/gr";
-import { FaGoogle, FaFacebook, FaApple } from "react-icons/fa"; // Keep FaGoogle for the new button
-
 import api from '../Services/api';
 import { login } from '../slices/AuthSlice';
-import { GoogleAuthProvider, signInWithPopup,getAuth } from 'firebase/auth';
-import { auth } from './Firebase';
-
 
 function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [apiError, setApiError] = useState('');
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false); // For email/password form
+    const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({ email: '', password: '' });
     const navigate = useNavigate();
     const dispatch = useDispatch();
-
-    // --- Existing Email/Password Validation ---
+    const googleClientId = import.meta.env.VITE_APP_GOOGLE_CLIENT_ID;
+    
+    // Email/Password Validation
     const validate = () => {
-        // (Your existing validation logic - keeping it the same)
         const newErrors = {};
         if (!email) {
             newErrors.email = "Email is required";
@@ -36,7 +31,23 @@ function Login() {
         return Object.keys(newErrors).length === 0;
     };
 
-    // --- Existing Email/Password Login Handler ---
+    // Handle OAuth code from URL (after redirect back from Google)
+    useEffect(() => {
+        // Check if we have a code in the URL (after OAuth redirect)
+        const authCode = new URLSearchParams(window.location.search).get('code');
+        
+        if (authCode) {
+            handleAuthCode(authCode);
+            
+            // Clean up the URL to remove the code parameter
+            if (window.history.replaceState) {
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+            }
+        }
+    }, []);
+
+    // Email/Password Login Handler
     const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -50,16 +61,14 @@ function Login() {
             const response = await api.post('/api/login', { email, password });
             if (response.status === 200 && response.data?.data) {
                 const { token, name, email, apps } = response.data.data;
-                localStorage.setItem('authToken', token); // Consider if needed alongside Redux state
-                localStorage.setItem('userInfo', JSON.stringify(response.data.data)); // Consider if needed
+                localStorage.setItem('authToken', token);
+                localStorage.setItem('userInfo', JSON.stringify(response.data.data));
 
-                // Dispatch using the structure from your original code
                 dispatch(login({
-                    user: { name, email, apps }, // Includes apps from your API
+                    user: { name, email, apps },
                     token
                 }));
 
-                // Redirect based on apps (from your original logic)
                 if (!apps || apps.length === 0) {
                     navigate('/Home');
                 } else {
@@ -76,81 +85,80 @@ function Login() {
         }
     };
 
-    // --- NEW: Google Login Success Handler ---
-    const handleGoogleLoginSuccess = async () => {
+    // Function to handle the authorization code
+    const handleAuthCode = async (authCode) => {
         setApiError('');
         setLoading(true);
         
         try {
-            const provider = new GoogleAuthProvider();
-            provider.addScope('https://www.googleapis.com/auth/cloud-platform.read-only');
-            const result = await signInWithPopup(auth, provider);
+            console.log('Authorization code received:', authCode);
             
-        
-            // 1. Get Firebase ID token
-            const idToken = await result.user.getIdToken();
-            console.log(idToken)
-              // ✅ Get Google access token
-            const credential = GoogleAuthProvider.credentialFromResult(result);
-            const accessToken = credential.accessToken;
-              // ✅ Save it to localStorage
-            localStorage.setItem('googleAccessToken', accessToken);
+            // Send the code to your backend
+            const backendResponse = await api.post('/api/auth/google-login', {
+              authCode: authCode,
+              scope: "https://www.googleapis.com/auth/firebase.readonly", 
+              requestAccessToken: true ,
+            }, { headers: { 'Content-Type': 'application/json' } });
             
-            // 2. Send token to your backend
-            const response = await api.post('/api/auth/google-login', { idToken });
-        
             console.log("Backend response:", {
-                status: response.status,
-                data: response.data
+                status: backendResponse.status,
+                data: backendResponse.data
             });
-        
-            if (response.status === 200) {
-                const { token, email, name } = response.data.data;
-                console.log("jwt",token)
+            
+            if (backendResponse.status === 200) {
+                // Destructure the response data
+                const { name, email, firebaseProjects, token } = backendResponse.data.data;
+                console.log("JWT from backend:", token);
                 
-                // Use uid as the token
                 
-        
-                // 3. Save to localStorage
+                // Save tokens and user info to localStorage
                 localStorage.setItem('authToken', token);
-                localStorage.setItem('userInfo', JSON.stringify({ email, name, token }));
-        
-                // 4. Update Redux
+                
+                localStorage.setItem('userInfo', JSON.stringify({ email, name, token, firebaseProjects }));
+                
+                // Update Redux
                 console.log('Dispatching login to Redux...');
                 dispatch(login({
-                    user: { name, email, apps: [] }, // Include empty apps array if needed
+                    user: { name, email, firebaseProjects},
                     token: token
                 }));
-        
-                // 5. Redirect
-                navigate('/Home');
+                
+                // Redirect
+                navigate('/dashboard');
             } else {
-                throw new Error('Authentication failed');
+                throw new Error(backendResponse.data?.message || 'Google authentication failed on the backend');
             }
         } catch (error) {
-            console.error("Authentication error:", {
+            console.error("Google authentication error:", {
                 message: error.message,
                 response: error.response?.data
             });
-        
-            setApiError(
-                error.response?.data?.message ||
-                error.message ||
-                'Firebase Google authentication failed'
-            );
+            setApiError(error.response?.data?.message || error.message || 'Google authentication failed');
         } finally {
             setLoading(false);
         }
     };
-
-    // --- NEW: Google Login Error Handler ---
-    const handleGoogleLoginError = () => {
-        console.error('Google Login Failed');
-        setApiError('Google Sign-In failed. Please try again.');
-        // setLoading(false); // Reset loading if you added it
+    
+    // Initialize Google OAuth flow
+    const initiateGoogleAuth = () => {
+        // Configure OAuth parameters
+        const params = {
+            client_id: googleClientId,
+            redirect_uri: window.location.origin + window.location.pathname, // Current page URL
+            scope: 'email profile https://www.googleapis.com/auth/firebase.readonly',
+            response_type: 'code',
+            access_type: 'offline', // Get a refresh token
+            prompt: 'consent'
+        };
+        
+        // Build the authorization URL
+        const authUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' + 
+            new URLSearchParams(params).toString();
+        
+        // Redirect to Google's OAuth page
+        window.location.href = authUrl;
     };
-
-
+    
     return (
         <div className="flex justify-center items-center min-h-screen">
             <div className="bg-white shadow-md rounded-[20px] p-8 max-w-sm w-full">
@@ -160,13 +168,13 @@ function Login() {
 
                 {apiError && <p className="text-red-500 text-center mb-4">{apiError}</p>}
 
-                {/* --- Email/Password Form --- */}
+                {/* Email/Password Form */}
                 <form className="space-y-4" onSubmit={handleLogin}>
                     {/* Email Input */}
                     <div>
                         <input
                             type="email" id="email" name="email" placeholder="Email Address"
-                            value={email} onChange={(e) => setEmail(e.target.value)} required
+                            value={email} onChange={(e) => setEmail(e.target.value)}
                             className="mt-1 block w-full font-Poppins px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         />
                         {errors.email && <p style={{ color: "red" }}>{errors.email}</p>}
@@ -175,7 +183,7 @@ function Login() {
                     <div className="relative">
                         <input
                             type={showPassword ? "text" : "password"} id="password" name="password" placeholder="Password"
-                            value={password} onChange={(e) => setPassword(e.target.value)} required
+                            value={password} onChange={(e) => setPassword(e.target.value)}
                             className="mt-1 block w-full font-Poppins px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         />
                         <button type="button" onClick={() => setShowPassword(!showPassword)}
@@ -206,39 +214,18 @@ function Login() {
                     </p>
                 </form>
 
-                {/* --- Social Login Options --- */}
+                {/* Social Login Options */}
                 <div className="mt-6 flex flex-col items-center">
                     <p className="text-primaryButton font-Poppins mb-3">Or continue with</p>
-                    <div className="flex space-x-4">
-                        {/* NEW: Google Login Button */}
-                            <button 
-                                onClick={handleGoogleLoginSuccess}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    padding: '10px 16px',
-                                    backgroundColor: '#fff',
-                                    border: '1px solid #ccc',
-                                    borderRadius: '6px',
-                                    cursor: 'pointer'
-                                }}
-                                >
-                                <img 
-                                    src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
-                                    alt="Google" 
-                                    style={{ width: '20px', marginRight: '10px' }}
-                                />
-                                Sign in with Google
-                                </button>
-
-                        {/* Placeholder buttons for other providers */}
-                        {/* <button className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm hover:bg-gray-100">
-                            <FaFacebook className="h-5 w-5" />
-                        </button>
-                        <button className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm hover:bg-gray-100">
-                            <FaApple className="h-5 w-5" />
-                        </button> */}
-                    </div>
+                    <button 
+                        type="button"
+                        onClick={initiateGoogleAuth}
+                        disabled={loading}
+                        className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                    >
+                        <img src="google-icon.svg" alt="Google" className="w-5 h-5 mr-2" />
+                        Sign in with Google
+                    </button>
                 </div>
             </div>
         </div>

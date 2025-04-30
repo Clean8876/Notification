@@ -60,14 +60,14 @@ const Navbar = () => {
     dispatch(logout());
     localStorage.removeItem('authToken');
     localStorage.removeItem('userInfo');
-    navigate('/');
+    navigate('/login');
     setMobileMenuOpen(false);
   };
 
   return (
     <>
       {/* Main Navbar */}
-      <nav className="fixed top-0 left-0 right-0 md:left-64 flex justify-between items-center px-4 sm:px-6 py-3 bg-white shadow-md z-30">
+      <nav className="fixed top-0 left-0 right-0 md:left-64 flex justify-between items-center px-4 sm:px-6 py-3 bg-white z-50 border-b border-gray-200 ">
         {/* Mobile Menu Toggle */}
         <button 
           className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100"

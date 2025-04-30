@@ -3,6 +3,10 @@ import { FaCloudUploadAlt } from "react-icons/fa";
 import api from '../Services/api';
 import { useProject } from '../context/ProjectContext';
 import { useStepper } from '../context/StepperContext';
+import gif1 from '../assets/gif/gif1.gif'
+import gif2 from '../assets/gif/gif2.gif'
+import gif3 from '../assets/gif/gif3.gif'
+import firebase from '../assets/firebase.svg'
 
 function JsonUpload() {
     const [file, setFile] = useState(null);
@@ -90,13 +94,24 @@ function JsonUpload() {
     };
     
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <div className="bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-lg w-full max-w-6xl flex flex-col lg:flex-row gap-6">
+    <div className="flex flex-col h-full w-full bg-white p-4 ">
+      <div className="bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-lg w-full flex flex-col lg:flex-row gap-6 flex-grow">
         {/* Left Section - Upload Form */}
-        <div className="w-full lg:w-1/2">
+        <div className="w-full lg:w-1/2 flex justify-center items-start">
+        <div className="w-full max-w-md">
           <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4">Connect Your Firebase Project</h2>
-          <p className="mb-4 sm:mb-6 text-sm sm:text-base">Upload your Firebase Service Account JSON file to send notifications.</p>
-
+          <p className="mb-4 sm:mb-5 text-sm sm:text-base">Upload your Firebase Service Account JSON file to send notifications.</p>
+          <div className="flex items-center gap-2 p-1">
+            <img src={firebase} alt="Firebase Logo" className="w-8 h-8" />
+            <a
+              href="https://console.firebase.google.com/u/0/project/_/settings/serviceaccounts/adminsdk"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline text-sm sm:text-base"
+            >
+              Retrieve JSON Service Key from your Firebase Console
+            </a>
+          </div>
           <div className="border-2 border-dashed border-gray-300 p-3 sm:p-6 mb-4">
             <div
               className="h-28 sm:h-40 border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer rounded-lg"
@@ -187,6 +202,7 @@ function JsonUpload() {
               {showGuide ? 'Hide guide' : 'Show me how'}
             </button>
           </div>
+          </div>
         </div>
 
         {/* Right Section - Guide Preview */}
@@ -195,25 +211,25 @@ function JsonUpload() {
             {showGuide ? (
               <div className="space-y-4 sm:space-y-6">
                 <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
-                  <h3 className="font-semibold mb-2 text-sm sm:text-base">Step 1: Find the Key in Firebase Console</h3>
+                  <h3 className="font-semibold mb-2 text-sm sm:text-base">Step 1: Go to Project settings</h3>
                   <img
-                    src="https://via.placeholder.com/600x400?text=Step+1+GIF"
+                    src={gif1}
                     alt="Guide step 1"
                     className="rounded-lg border w-full"
                   />
                 </div>
                 <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
-                  <h3 className="font-semibold mb-2 text-sm sm:text-base">Step 2: Download the JSON File</h3>
+                  <h3 className="font-semibold mb-2 text-sm sm:text-base">Step 2: Click on Service account </h3>
                   <img
-                    src="https://via.placeholder.com/600x400?text=Step+2+GIF"
+                    src={gif2}
                     alt="Guide step 2"
                     className="rounded-lg border w-full"
                   />
                 </div>
                 <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
-                  <h3 className="font-semibold mb-2 text-sm sm:text-base">Step 3: Upload It Here</h3>
+                  <h3 className="font-semibold mb-2 text-sm sm:text-base">Step 3: Click on Generate key</h3>
                   <img
-                    src="https://via.placeholder.com/600x400?text=Step+3+GIF"
+                    src={gif3}
                     alt="Guide step 3" 
                     className="rounded-lg border w-full"
                   />

@@ -39,12 +39,33 @@ function ConfirmProjectUpload() {
             setServiceAccountFile(null); // Optionally clear the file from context after saving
             navigate('/dashboard')
             console.log("✅ Firebase service account saved:", response.data);
-          } else {
+          }
+          
+          else {
             throw new Error('Unexpected server response.');
           }
         } catch (err) {
-          console.error("❌ Error uploading:", err);
-          setError(err.message || 'Something went wrong.');
+          console.error("Full Axios error:", err);
+
+          let message = 'Something went wrong.';
+        
+          if (err.response) {
+            // Normal response error
+            if (err.response.status === 500) {
+              message = "🚫 This project already exists. Try a different one";
+            } else if (err.response.data) {
+              message = err.response.data.message || err.response.data;
+            }
+          } else if (err.request) {
+            // The request was made, but no response was received (network issues)
+            message = "⚠️ Network error. Please check your connection or try again later.";
+          } else {
+            // Other types of errors
+            message = `Unexpected error: ${err.message}`;
+          }
+        
+          setError(message);
+          
         } finally {
           setIsProcessing(false);
         }
@@ -67,7 +88,11 @@ function ConfirmProjectUpload() {
           <p className="text-gray-600">
             Please review the details below before finalizing your Firebase service account upload.
           </p>
-
+          {error && (
+            <div className="w-full bg-red-100 text-red-700 p-3 rounded-xl text-sm">
+              {error}
+            </div>
+            )}
           <div className="w-full bg-gray-50 rounded-xl p-4 space-y-4 text-left">
             <div>
               <p className="text-sm text-gray-500">Project Name</p>

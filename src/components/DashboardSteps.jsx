@@ -15,22 +15,25 @@ const DashboardSteps = () => {
   ];
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Add New Project</h1>
+    <main className="pt-16 md:pt-16 w-10/12">
+    <div className="p-1  p-1  ">
+        <div className="max-max-w-4xl mx-auto">
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">Add New Project</h1>
+        </div>
       <Stepper>
         <Step title={stepLabels[0]}>
-          <Home className="bg-white p-6 rounded-lg shadow-sm" />
+          <Home className="" />
         </Step>
         
         <Step title={stepLabels[1]}>
-          <JsonUpload className="bg-white p-6 rounded-lg shadow-sm" />
+          <JsonUpload className="" />
         </Step>
         
         <Step title={stepLabels[2]}>
-          <ConfirmProjectUpload className="bg-white p-6 rounded-lg shadow-sm" />
+          <ConfirmProjectUpload className="" />
         </Step>
       </Stepper>
-    </div>
+    </div></main>
   );
 };
 

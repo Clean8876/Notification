@@ -154,12 +154,14 @@
 // export default Home;
 
 import api from '../Services/api';
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import { useProject } from '../context/ProjectContext';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector} from 'react-redux';
 import { updateUserApps } from '../slices/AuthSlice';
 import { useStepper } from '../context/StepperContext';
+import { selectUser } from '../slices/AuthSlice';
+
 
 
 function Home() {
@@ -169,6 +171,17 @@ function Home() {
   const [projectName, setProjectName] = useState('');
   const dispatch = useDispatch();
   const { saveProject, loading, error } = useProject();
+  const projects = useSelector((state)=> state.auth?.user?.user?.firebaseProjects)
+ const {selectProject} = useProject()
+
+
+
+ useEffect(() => {
+  if (selectProject) {
+    setProjectId(selectProject.projectId);
+    setProjectName(selectProject.projectName);
+  }
+}, [selectProject]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -236,13 +249,14 @@ function Home() {
     //   setLoading(false);
     // }
     await saveProject({ projectId, projectName });
+    // console.log("this is the porject from firebase",projects)
     // Mark step completed and advance
     markStepCompleted();
     nextStep();
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center p-4 ">
     <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md transition-all duration-300 hover:shadow-2xl">
       <div className="flex flex-col items-center mb-8">
    
@@ -272,12 +286,13 @@ function Home() {
       )}
 
       <form className="space-y-6" onSubmit={handleSubmit}>
-        <div className="space-y-5">
-          <div>
+        {/* <div className="space-y-5"> */}
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-2 font-Poppins">
               Project ID
             </label>
             <div className="relative rounded-md shadow-sm">
+              
               <input
                 type="text"
                 id="ProjectID"
@@ -303,9 +318,9 @@ function Home() {
                 </svg>
               </div>
             </div>
-          </div>
+          </div> */}
 
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-2 font-Poppins">
               Project Name
             </label>
@@ -337,7 +352,68 @@ function Home() {
                 </svg>
               </div>
             </div>
-          </div>
+          </div> */}
+          <div className="space-y-5">
+    {/* Dropdown Selector */}
+    {projects.length > 0 && (
+  <div className="space-y-6 bg-gradient-to-br from-white to-gray-50 p-8 rounded-2xl shadow-xl">
+    <div className="space-y-1">
+      <div className="flex items-center gap-2 mb-4">
+        {/* <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg> */}
+        <h2 className="text-2xl font-semibold text-gray-900 font-Poppins">Select Firebase Project</h2>
+      </div>
+      
+      <p className="text-gray-500 text-sm font-Poppins">
+        Choose your existing Firebase project from the list below
+      </p>
+    </div>
+
+    <div className="relative group">
+      <select
+      value={projectId}
+        onChange={(e) => {
+          const selected = projects.find(p => p.projectId === e.target.value);
+          if (selected) {
+            setProjectId(selected.projectId);
+            setProjectName(selected.projectName);
+          }
+        }}
+        className="w-full px-5 py-4 rounded-xl border-2 border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all duration-200 font-Poppins text-gray-800 shadow-sm hover:border-gray-300 appearance-none cursor-pointer"
+      >
+        <option value="" className="text-gray-400">Select project...</option>
+        {projects.map((project) => (
+          <option 
+            key={project.projectId} 
+            value={project.projectId}
+            className="text-gray-700 py-2 hover:bg-blue-50"
+          >
+            {project.projectName}
+          </option>
+        ))}
+      </select>
+      
+      <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+        <svg className="w-5 h-5 text-gray-400 group-hover:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </div>
+    </div>
+    
+    {projectId && (
+      <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 animate-fade-in">
+        <div className="flex items-center gap-3">
+          <span className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full"/>
+          <p className="text-sm text-gray-600 font-Poppins">
+            Selected: <span className="font-medium text-gray-900">{projectName}</span>
+          </p>
+        </div>
+      </div>
+    )}
+  </div>
+)}
+
         </div>
 
         <button

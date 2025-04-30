@@ -6,6 +6,7 @@ import Navbar from './Navbar';
 
 const Layout = () => {
   return (
+    
     <div className="flex h-screen">
       <Sidebar />
 

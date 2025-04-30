@@ -8,9 +8,10 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { Provider } from 'react-redux';
 import { store,persistor } from './Services/Store.js';
 import { ProjectProvider } from './context/ProjectContext.jsx';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 
-const clientId = "1019189497719-6oo2tdmhueq2pjne3cikrnttms0ug0ra.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_APP_GOOGLE_CLIENT_ID;
 
 
  
@@ -18,6 +19,7 @@ const clientId = "1019189497719-6oo2tdmhueq2pjne3cikrnttms0ug0ra.apps.googleuser
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
     <ProjectProvider>
      <Provider store={store}>
      <PersistGate loading={null} persistor={persistor}>
@@ -26,6 +28,6 @@ createRoot(document.getElementById('root')).render(
     
     </BrowserRouter>
     </PersistGate>
-    </Provider></ProjectProvider>
-  </StrictMode>,
+    </Provider></ProjectProvider></GoogleOAuthProvider>
+  </StrictMode>
 )

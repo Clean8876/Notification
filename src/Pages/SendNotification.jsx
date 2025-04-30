@@ -7,12 +7,15 @@ import MultiDatePicker from '../components/ScheduleNotification';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom'; // Import Link for navigation
+import { useProject } from '../context/ProjectContext';
+import { FaSpinner } from 'react-icons/fa6';
 
 function SendNotification() {
   const user = useSelector(selectUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const UPLOAD_PRESET = import.meta.env.VITE_UPLOAD_PRESET; 
   const CLOUD_NAME = import.meta.env.VITE_CLOUD_NAME;
+  const {selectProject} = useProject()
   
   const [formData, setFormData] = useState({
     projectId: '',
@@ -148,7 +151,7 @@ function SendNotification() {
       }
     };
     fetchProjects();
-    const intervalId = setInterval(fetchProjects, 60000);
+    const intervalId = setInterval(fetchProjects, 300000);
     return () => clearInterval(intervalId);
   }, []);
   
@@ -332,6 +335,7 @@ function SendNotification() {
 
   // Normal render when projects are available
   return (
+    
     // <div>
     //   <div className="bg-white shadow-md rounded-[20px] p-8 max-w-sm w-full">
     //     {isAuthenticated && (
@@ -537,6 +541,7 @@ function SendNotification() {
     //     </form>
     //   </div>
     // </div>
+    <main className="pt-16 md:pt-16 w-10/12">
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
     <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-8">
       <div className="mb-10">
@@ -756,7 +761,7 @@ function SendNotification() {
         >
           {submitting ? (
             <span className="flex items-center justify-center gap-2">
-              <span className="animate-spin">🌀</span>
+              <FaSpinner  className="animate-spin"/>
               Sending...
             </span>
           ) : notificationType === 'Immediate Notification' ? (
@@ -768,6 +773,7 @@ function SendNotification() {
       </form>
     </div>
   </div>
+  </main>
   );
 }
 

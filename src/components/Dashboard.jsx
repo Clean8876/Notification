@@ -442,7 +442,8 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col bg-gray-100" style={{ fontFamily: 'Poppins, sans-serif' }}>
+    <main className="pt-16 md:pt-16 w-10/12">
+    <div className="w-full min-h-screen flex flex-col " style={{ fontFamily: 'Poppins, sans-serif' }}>
     <div className="h-16 md:h-20"></div>
 
         <div className="flex-1 p-4 md:p-6"> 
@@ -514,6 +515,7 @@ const Dashboard = () => {
         </div>
       </div>
     </div>
+    </main>
   );
 };
 

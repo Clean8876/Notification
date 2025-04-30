@@ -13,6 +13,7 @@ export const ProjectProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [serviceAccountFile, setServiceAccountFile] = useState(null);
+  const [selectProject,setSelectProject] = useState(null)
 
   // Simulated "save" logic (no real API call)
   const saveProject = async ({ projectId, projectName }) => {
@@ -37,7 +38,7 @@ export const ProjectProvider = ({ children }) => {
 
   return (
     <ProjectContext.Provider value={{ project, loading, error, saveProject, serviceAccountFile,
-      setServiceAccountFile }}>
+      setServiceAccountFile , selectProject,setSelectProject }}>
       {children}
     </ProjectContext.Provider>
   );
