@@ -149,6 +149,9 @@ import showProject from './Pages/showProject';
 import Card from './components/Bucket';
 import SetupEmail from './Pages/SetupEmail';
 import SendMail from './Pages/SendMail';
+import LandingPage from './Pages/LandingPage';
+import SubscriptionGate from './components/Subscription/SubscriptionGate';
+import Analytics from './components/Visiualization/Analytics';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requireProject = false }) => {
@@ -258,6 +261,7 @@ function App() {
         >
           <Route index element={<Dashboard />} />
           <Route path='projects' element={<Card/>}/>
+          <Route path='analytics' element={<Analytics/>}/>
           <Route path="dash" element={<Dashboard />} />
           <Route path="sendNotification" element={<SendNotification />} />
           <Route path="AddProject" element={<DashboardSteps />} />
@@ -265,6 +269,8 @@ function App() {
         </Route>
         <Route path='/mail' element ={<SetupEmail/>}/>
         <Route path='/sendMail' element ={<SendMail/>}/>
+        <Route path='/' element ={<LandingPage/>}/>
+        <Route path='/Subscription' element ={<SubscriptionGate/>}/>
 
         {/* Default Redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />

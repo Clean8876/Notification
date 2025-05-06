@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom'; // Import Link for navigation
 import { useProject } from '../context/ProjectContext';
 import { FaSpinner } from 'react-icons/fa6';
 
+
 function SendNotification() {
   const user = useSelector(selectUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -18,7 +19,7 @@ function SendNotification() {
   const {selectProject} = useProject()
   
   const [formData, setFormData] = useState({
-    projectId: '',
+    projectId: selectProject?.projectId || "",
     title: '',
     message: '',
     imageUrl: '',
@@ -30,6 +31,7 @@ function SendNotification() {
   const [error, setError] = useState('');
   const [notificationType, setNotificationType] = useState('Immediate Notification');
   const [scheduledTimes, setScheduledTimes] = useState([]);
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const fileInputRef = useRef(null);
   
   // Image uploader states
@@ -37,13 +39,38 @@ function SendNotification() {
   const [fileDataUrl, setFileDataUrl] = useState(null);
   const [uploadError, setUploadError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get('/api/users/details');
+        
+        // Extract the subscribed status from the response
+        const { subscribed } = response.data;
+        setIsSubscribed(subscribed);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch user subscription details');
+        setLoading(false);
+        console.error('Error fetching user details:', err);
+      }
+    };
 
+    fetchUserDetails();
+  }, []);
   useEffect(() => {
     // If only one project exists, set it automatically
     if (projects.length === 1) {
       setFormData((prev) => ({ ...prev, projectId: projects[0] }));
     }
   }, [projects]);
+  useEffect(() => {
+    if (!isSubscribed ) {
+      setFormData(prev => ({ ...prev, projectId: "Test Project" }));
+    } else if (selectProject?.projectId) {
+      setFormData(prev => ({ ...prev, projectId: selectProject.projectId }));
+    }
+  }, [isSubscribed],selectProject);
 
   const handleTypeChange = (e) => {
     setNotificationType(e.target.value);
@@ -292,7 +319,7 @@ function SendNotification() {
           You need to add at least one project before you can send notifications.
         </p>
         <Link 
-          to="/dashboard/home" // Replace with your actual route for adding projects
+          to="/dashboard/projects" // Replace with your actual route for adding projects
           className="w-full py-2 px-4 font-Poppins bg-primaryButton text-white font-semibold rounded-[10px] shadow hover:bg-blue-700 focus:outline-none focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-100"
         >
           Add Project
@@ -556,36 +583,45 @@ function SendNotification() {
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Project Selection */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 font-Poppins mb-3">
-            Select Project
-          </label>
-          {projects.length === 1 ? (
-            <div className="relative">
-              <input
-                type="text"
-                value={formData.projectId || projects[0]}
-                readOnly
-                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 font-Poppins text-gray-700 focus:outline-none focus:border-blue-500"
-              />
-              <div className="absolute inset-y-0 right-3 flex items-center">
-                <span className="text-blue-500">✔</span>
+            <label className="block text-sm font-semibold text-gray-700 font-Poppins mb-3">
+              Select Project
+            </label>
+
+            {(!isSubscribed || projects.length === 1) ? (
+              // Show read-only input if user is not subscribed OR only one project exists
+              <div className="relative">
+                <input
+                  type="text"
+                  value={formData.projectId || "Test Project"}
+                  readOnly
+                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 font-Poppins text-gray-700 focus:outline-none focus:border-blue-500"
+                />
+                <div className="absolute inset-y-0 right-3 flex items-center">
+                  <span className="text-blue-500">✔</span>
+                </div>
               </div>
-            </div>
-          ) : (
-            <select
-              value={formData.projectId || ""}
-              onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
-              className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 font-Poppins text-gray-700 focus:outline-none focus:border-blue-500 appearance-none"
-            >
-              <option value="">Choose a project...</option>
-              {projects.map((projectId) => (
-                <option key={projectId} value={projectId}>
-                  {projectId}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
+            ) : (
+              <select
+                value={formData.projectId || ""}
+                onChange={(e) => setFormData({ ...formData, projectId: e.target.value })}
+                disabled={!isSubscribed}
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 font-Poppins text-gray-700 focus:outline-none focus:border-blue-500 appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="">Choose a project...</option>
+                {projects.map((projectId) => (
+                  <option key={projectId} value={projectId}>
+                    {projectId}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            {!isSubscribed && (
+              <p className="mt-2 text-sm text-gray-500 italic">
+                You are using a test project. Subscribe to manage other projects.
+              </p>
+            )}
+          </div>
 
         {/* Notification Type Toggle */}
         <div>

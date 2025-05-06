@@ -9,7 +9,7 @@ import { Provider } from 'react-redux';
 import { store,persistor } from './Services/Store.js';
 import { ProjectProvider } from './context/ProjectContext.jsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_APP_GOOGLE_CLIENT_ID;
 
@@ -19,6 +19,7 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_APP_GOOGLE_CLIENT_ID;
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
+    <TooltipProvider>
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
     <ProjectProvider>
      <Provider store={store}>
@@ -29,5 +30,6 @@ createRoot(document.getElementById('root')).render(
     </BrowserRouter>
     </PersistGate>
     </Provider></ProjectProvider></GoogleOAuthProvider>
+    </TooltipProvider>
   </StrictMode>
 )

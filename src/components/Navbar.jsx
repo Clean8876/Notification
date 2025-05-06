@@ -49,7 +49,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
 import { selectUser, selectIsAuthenticated, logout } from "../slices/AuthSlice";
 
-const Navbar = () => {
+const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const user = useSelector(selectUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const dispatch = useDispatch();
@@ -68,25 +68,19 @@ const Navbar = () => {
     <>
       {/* Main Navbar */}
       <nav className="fixed top-0 left-0 right-0 md:left-64 flex justify-between items-center px-4 sm:px-6 py-3 bg-white z-50 border-b border-gray-200 ">
-        {/* Mobile Menu Toggle */}
-        <button 
-          className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          {mobileMenuOpen ? <IoIosClose size={24} /> : <IoIosMenu size={24} />}
-        </button>
+       
+        {/* Mobile toggle */}
+      <button
+        className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      >
+        {isSidebarOpen ? <IoIosClose size={24} /> : <IoIosMenu size={24} />}
+      </button>
 
         {/* Logo */}
-        <Link 
-          to={isAuthenticated ? "/dashboard/home" : "/"} 
-          className="flex items-center"
-        >
-          <img 
-            src={logo} 
-            alt="Logo" 
-            className="h-8 sm:h-10 md:h-12" 
-          />
-        </Link>
+        <Link to={isAuthenticated ? "/dashboard/home" : "/"}>
+        <img src={logo} alt="Logo" className="h-8 sm:h-10 md:h-12" />
+      </Link>
 
         {/* User Info & Logout Button */}
         {isAuthenticated && (

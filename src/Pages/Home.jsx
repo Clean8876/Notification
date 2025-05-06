@@ -173,7 +173,7 @@ function Home() {
   const { saveProject, loading, error } = useProject();
   const projects = useSelector((state)=> state.auth?.user?.user?.firebaseProjects)
  const {selectProject} = useProject()
-
+ const [isSubscribed, setIsSubscribed] = useState(false);
 
 
  useEffect(() => {
@@ -182,6 +182,25 @@ function Home() {
     setProjectName(selectProject.projectName);
   }
 }, [selectProject]);
+useEffect(() => {
+  const fetchUserDetails = async () => {
+    try {
+      
+      const response = await api.get('/api/users/details');
+      
+      // Extract the subscribed status from the response
+      const { subscribed } = response.data;
+      setIsSubscribed(subscribed);
+      
+    } catch (err) {
+      setError('Failed to fetch user subscription details');
+      
+      console.error('Error fetching user details:', err);
+    }
+  };
+
+  fetchUserDetails();
+}, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -286,133 +305,91 @@ function Home() {
       )}
 
       <form className="space-y-6" onSubmit={handleSubmit}>
-        {/* <div className="space-y-5"> */}
-          {/* <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 font-Poppins">
-              Project ID
-            </label>
-            <div className="relative rounded-md shadow-sm">
-              
-              <input
-                type="text"
-                id="ProjectID"
-                name="ProjectID"
-                placeholder="my-firebase-project"
-                required
-                value={projectId}
-                onChange={(e) => setProjectId(e.target.value.trim())}
-                className="block w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all font-Poppins placeholder-gray-400"
-                disabled={loading}
-              />
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                <svg 
-                  className="h-5 w-5 text-gray-400" 
-                  fill="currentColor" 
-                  viewBox="0 0 20 20"
-                >
-                  <path 
-                    fillRule="evenodd" 
-                    d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" 
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div> */}
-
-          {/* <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 font-Poppins">
-              Project Name
-            </label>
-            <div className="relative rounded-md shadow-sm">
-              <input
-                type="text"
-                id="ProjectName"
-                name="ProjectName"
-                placeholder="MyApp"
-                required
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                className="block w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all font-Poppins placeholder-gray-400"
-                disabled={loading}
-              />
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                <svg 
-                  className="h-5 w-5 text-gray-400" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth="2" 
-                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div> */}
+       
           <div className="space-y-5">
     {/* Dropdown Selector */}
-    {projects.length > 0 && (
-  <div className="space-y-6 bg-gradient-to-br from-white to-gray-50 p-8 rounded-2xl shadow-xl">
-    <div className="space-y-1">
-      <div className="flex items-center gap-2 mb-4">
-        {/* <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-        </svg> */}
-        <h2 className="text-2xl font-semibold text-gray-900 font-Poppins">Select Firebase Project</h2>
-      </div>
-      
-      <p className="text-gray-500 text-sm font-Poppins">
-        Choose your existing Firebase project from the list below
-      </p>
-    </div>
+    {isSubscribed ? (
+          // Show dropdown for subscribed users
+          <div className="space-y-6  p-8 rounded-2xl ">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 mb-4">
+                <h2 className="text-2xl font-semibold text-gray-900 font-Poppins">Select Firebase Project</h2>
+              </div>
+              <p className="text-gray-500 text-sm font-Poppins">
+                Choose your existing Firebase project from the list below
+              </p>
+            </div>
 
-    <div className="relative group">
-      <select
-      value={projectId}
-        onChange={(e) => {
-          const selected = projects.find(p => p.projectId === e.target.value);
-          if (selected) {
-            setProjectId(selected.projectId);
-            setProjectName(selected.projectName);
-          }
-        }}
-        className="w-full px-5 py-4 rounded-xl border-2 border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all duration-200 font-Poppins text-gray-800 shadow-sm hover:border-gray-300 appearance-none cursor-pointer"
-      >
-        <option value="" className="text-gray-400">Select project...</option>
-        {projects.map((project) => (
-          <option 
-            key={project.projectId} 
-            value={project.projectId}
-            className="text-gray-700 py-2 hover:bg-blue-50"
-          >
-            {project.projectName}
-          </option>
-        ))}
-      </select>
-      
-      <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-        <svg className="w-5 h-5 text-gray-400 group-hover:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
-        </svg>
-      </div>
-    </div>
-    
-    {projectId && (
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 animate-fade-in">
-        <div className="flex items-center gap-3">
-          <span className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full"/>
-          <p className="text-sm text-gray-600 font-Poppins">
-            Selected: <span className="font-medium text-gray-900">{projectName}</span>
-          </p>
-        </div>
-      </div>
-    )}
-  </div>
-)}
+            <div className="relative group">
+              <select
+                value={projectId}
+                onChange={(e) => {
+                  const selected = projects.find(p => p.projectId === e.target.value);
+                  if (selected) {
+                    setProjectId(selected.projectId);
+                    setProjectName(selected.projectName);
+                  }
+                }}
+                className="w-full px-5 py-4 rounded-xl border-2 border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all duration-200 font-Poppins text-gray-800 shadow-sm hover:border-gray-300 appearance-none cursor-pointer"
+              >
+                <option value="" className="text-gray-400">Select project...</option>
+                {projects.map((project) => (
+                  <option 
+                    key={project.projectId} 
+                    value={project.projectId}
+                    className="text-gray-700 py-2 hover:bg-blue-50"
+                  >
+                    {project.projectName}
+                  </option>
+                ))}
+              </select>
+              
+              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </div>
+            </div>
+            
+            {projectId && (
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 animate-fade-in">
+                <div className="flex items-center gap-3">
+                  <span className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full"/>
+                  <p className="text-sm text-gray-600 font-Poppins">
+                    Selected: <span className="font-medium text-gray-900">{projectName}</span>
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          // Show demo placeholder for non-subscribed users
+          <div className="space-y-6 p-8 rounded-2xl ">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 mb-4">
+                <h2 className="text-2xl font-semibold text-gray-900 font-Poppins">Test Project</h2>
+              </div>
+              <p className="text-gray-500 text-sm font-Poppins">
+                Upgrade to access your real Firebase projects
+              </p>
+            </div>
+
+            <div className="relative group">
+              <div className="w-full px-5 py-4 rounded-xl border-2 border-gray-200 bg-gray-100 font-Poppins text-gray-500">
+                Test Project
+              </div>
+            </div>
+            
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center gap-3">
+                <span className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full"/>
+                <p className="text-sm text-gray-600 font-Poppins">
+                  Subscribe to unlock full functionality
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         </div>
 
