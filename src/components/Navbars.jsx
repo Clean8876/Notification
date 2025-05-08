@@ -9,6 +9,20 @@ import { IoIosPower } from "react-icons/io";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge"
+import { User, Settings, LogOut } from "lucide-react";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 
 import api from "../Services/api"
@@ -99,7 +113,18 @@ function Navbars() {
                 <div className="flex flex-col items-end text-right">
                 
                 <div className="flex items-center gap-1">
-                {isSubscribed ? (
+            
+                  <span className="text-lg sm:text-lg text-gray-700 font-semibold font-Poppins truncate max-w-[120px]">
+                      {user?.user.name}
+                  </span>
+                  <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Avatar className="cursor-pointer">
+                            <AvatarFallback>{user?.user?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56">
+                          <DropdownMenuLabel className="flex justify-start px-5 ">    {isSubscribed ? (
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Badge 
@@ -122,23 +147,27 @@ function Navbars() {
                       >
                         Demo
                       </Badge>
-                    )}
-                  <span className="text-sm sm:text-base text-gray-700 font-medium font-Poppins truncate max-w-[120px]">
-                      {user?.user.name}
-                  </span>
+                    )}</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem asChild>
+                            <Link href="/profile" className="flex items-center gap-2">
+                              <User className="h-4 w-4" /> Profile Settings
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator /> {/* Added a separator before logout for visual distinction */}
+                          <DropdownMenuItem>
+                            <Button variant="destructive" onClick={handleLogout} className="w-full justify-start flex items-center gap-2">
+                              <LogOut className="h-4 w-4" /> Logout
+                            </Button>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
               </div>
                     <span className="text-xs text-gray-500 truncate max-w-[120px]">
                     {user?.user.role}
                     </span>
                 </div>
-                <button
-                    onClick={handleLogout}
-                    className="p-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
-                    aria-label="Logout"
-                    title="Logout"
-                >
-                    <IoIosPower size={18} className="w-5 h-5" />
-                </button>
+            
                 </div>
             ) : (
                 <Button
@@ -182,19 +211,39 @@ function Navbars() {
                       <span className="text-sm sm:text-base text-gray-700 font-medium font-Poppins truncate max-w-xs">
                           {user?.user.name}
                       </span>
-                  </div>
-                      <span className="text-xs text-gray-500 truncate max-w-xs">
-                        {user?.user.role}
-                      </span>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Avatar className="cursor-pointer">
+                            <AvatarFallback>{user?.user?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56">
+                          <DropdownMenuLabel>{user?.user?.name}</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem asChild>
+                            <Link href="/profile" className="flex items-center gap-2">
+                              <User className="h-4 w-4" /> Profile Settings
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator /> {/* Added a separator before logout for visual distinction */}
+                          <DropdownMenuItem>
+                            <Button variant="destructive" onClick={handleLogout} className="w-full justify-start flex items-center gap-2">
+                              <LogOut className="h-4 w-4" /> Logout
+                            </Button>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                    <button 
+                     
+                    </div>
+                    {/* <button 
                       onClick={handleLogout}
                       className="p-1.5 sm:p-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
                       aria-label="Logout"
                       title="Logout"
                     >
                       <IoIosPower size={18} className="sm:w-5 sm:h-5" />
-                    </button>
+                    </button> */}
                   </div>):( <div className="hidden flex-1 items-center justify-end space-x-2 md:flex">
           <Button variant="default" onClick={handleLogin} className="bg-blue-500 text-white font-Poppins hover:bg-blue-600">
             SignIn

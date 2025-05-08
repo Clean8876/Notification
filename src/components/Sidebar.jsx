@@ -3,6 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FiMenu } from 'react-icons/fi';
 import { IoIosClose } from "react-icons/io";
+import { ChevronDown } from 'lucide-react';
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -93,7 +101,7 @@ const Sidebar = () => {
             }
             onClick={() => setIsOpen(false)}
           >
-            Dashboard
+            Scheduled Notification
           </NavLink>
           <NavLink
             to="/dashboard/sendNotification"
@@ -108,6 +116,48 @@ const Sidebar = () => {
           >
             Send Notification
           </NavLink>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="w-full justify-between">
+            Email
+            <ChevronDown className="h-4 w-4 opacity-50" />
+          </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent  className="w-56 transition-all duration-300 ease-in-out transform origin-top shadow-md">
+              <DropdownMenuItem asChild>
+              <NavLink
+            to="/dashboard/sendMail"
+            className={({ isActive }) =>
+              `block px-4 py-3 rounded-md transition-colors ${
+                isActive
+                  ? 'bg-blue-600 font-medium text-white'
+                  : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+              }`
+            }
+            onClick={() => setIsOpen(false)}
+          >
+            Send Email
+          </NavLink>
+
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+              <NavLink
+            to="/dashboard/mail"
+            className={({ isActive }) =>
+              `block px-4 py-3 rounded-md transition-colors ${
+                isActive
+                  ? 'bg-blue-600 font-medium text-white'
+                  : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+              }`
+            }
+            onClick={() => setIsOpen(false)}
+          >
+            Setup Email
+          </NavLink>
+
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <NavLink
             to="/dashboard/AddProject"
             className={({ isActive }) =>

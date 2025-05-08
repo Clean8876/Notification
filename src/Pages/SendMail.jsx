@@ -1,30 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import MonacoEditor from "react-monaco-editor";
 import api from '../Services/api';
 import { Toaster, toast } from 'sonner';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { FiSave, FiSmartphone, FiCode } from "react-icons/fi";
+import { FiSave, FiSmartphone, FiCode, FiMail, FiRefreshCw } from "react-icons/fi";
 
 function SendMail() {
-  const projects = [
-    { id: "ecommerce", name: "Ecommerce Notifications" },
-    { id: "hydozz", name: "Hydozz Platform" }
-  ];
-  
-  const [projectId, setProjectId] = useState(projects[0].id);
-  const [htmlTemplate, setHtmlTemplate] = useState("<!DOCTYPE html><html><body><p>Hello User</p></body></html>");
-  const [body, setBody] = useState("Hello User");
-  const [htmlDirty, setHtmlDirty] = useState(false);
-  const [isMobileView, setIsMobileView] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    if (!htmlDirty) {
-      const generatedHtml = `<!DOCTYPE html>
+  const [projects, setProjects] = useState([]);
+  const [projectId, setProjectId] = useState('');
+  const [subject, setSubject] = useState("Welcome to Digi9!");
+  const [htmlTemplate, setHtmlTemplate] = useState(`<!DOCTYPE html>
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,38 +21,85 @@ function SendMail() {
   </style>
 </head>
 <body>
-  <p>${body}</p>
+  <p>Hello User</p>
 </body>
-</html>`;
-      setHtmlTemplate(generatedHtml);
-    }
-  }, [body, htmlDirty]);
+</html>`);
+  const [body, setBody] = useState("Hello User");
+  const [isMobileView, setIsMobileView] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(true);
 
-  const handleBodyChange = (e) => {
-    setBody(e.target.value);
-  };
+  // Fetch projects from API
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setIsLoadingProjects(true);
+        const response = await api.get("/api/email-config/projects");
+        
+        if (response.data && response.data.data && response.data.data.length > 0) {
+          setProjects(response.data.data);
+          setProjectId(response.data.data[0]);
+        } else {
+          toast.error('No projects available');
+        }
+      } catch (error) {
+        console.error("Failed to fetch projects:", error);
+        toast.error('Failed to load projects');
+      } finally {
+        setIsLoadingProjects(false);
+      }
+    };
 
-  const handleHtmlChange = (value) => {
-    setHtmlDirty(true);
-    setHtmlTemplate(value);
-  };
+    fetchProjects();
+  }, []);
+
+  useEffect(() => {
+    // Always keep plain text in sync with HTML content
+    const plainText = htmlTemplate.replace(/<[^>]*>?/gm, '');
+    setBody(plainText);
+  }, [htmlTemplate]);
 
   const handleSubmit = async () => {
     try {
       setIsSaving(true);
-      const response = await api.post("/api/notifications/email", {
+      const payload = {
         projectId,
+        subject,
         body,
         htmlTemplate
-      });
+      };
+
+      const response = await api.post("/api/notifications/email", payload);
 
       if (response.status === 200) {
-        toast.success('Template saved successfully');
+        toast.success('Email sent successfully');
+      } else {
+        toast.error('Unexpected response from server');
       }
     } catch (error) {
-      toast.error('Failed to save template');
+      console.error(error);
+      toast.error('Failed to send email');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const refreshProjects = async () => {
+    try {
+      setIsLoadingProjects(true);
+      const response = await api.get("/api/email-config/projects");
+      
+      if (response.data && response.data.data && response.data.data.length > 0) {
+        setProjects(response.data.data);
+        if (!projectId) {
+          setProjectId(response.data.data[0]);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to refresh projects:", error);
+      toast.error('Failed to refresh projects');
+    } finally {
+      setIsLoadingProjects(false);
     }
   };
 
@@ -72,72 +107,95 @@ function SendMail() {
     <div className="min-h-screen bg-gray-50 p-6">
       <Toaster position="top-right" richColors />
       
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto">
-        {/* Control Bar */}
+        {/* Top Bar */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <FiCode className="h-6 w-6 text-blue-600" />
+            <FiMail className="h-6 w-6 text-blue-600" />
             <h1 className="text-xl font-semibold">Email Designer</h1>
           </div>
-          
-          <div className="flex items-center gap-4">
-            <Select value={projectId} onValueChange={setProjectId}>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={refreshProjects}
+              disabled={isLoadingProjects}
+            >
+              <FiRefreshCw className={`mr-2 h-4 w-4 ${isLoadingProjects ? 'animate-spin' : ''}`} />
+              Refresh Projects
+            </Button>
+            <Select 
+              value={projectId} 
+              onValueChange={setProjectId}
+              disabled={isLoadingProjects || projects.length === 0}
+            >
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Select project" />
+                {isLoadingProjects ? (
+                  <SelectValue placeholder="Loading projects..." />
+                ) : projects.length > 0 ? (
+                  <SelectValue placeholder="Select project" />
+                ) : (
+                  <SelectValue placeholder="No projects available" />
+                )}
               </SelectTrigger>
               <SelectContent>
                 {projects.map((project) => (
-                  <SelectItem key={project.id} value={project.id}>
-                    {project.name}
+                  <SelectItem key={project} value={project}>
+                    {project}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            
-           
           </div>
         </div>
 
-        {/* Editor & Preview */}
+        {/* Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Editor Section */}
+          {/* Editor */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>Email Editor</span>
+                <span>Email Configuration</span>
                 <div className="flex items-center space-x-4">
                   <label htmlFor="mobile-view">Mobile Preview</label>
                   <Switch 
                     id="mobile-view" 
                     checked={isMobileView}
                     onCheckedChange={setIsMobileView}
-                    
                   />
                 </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <label>Plain Text Content</label>
-                <Input
-                  as="textarea"
-                  rows={4}
-                  value={body}
-                  onChange={handleBodyChange}
-                  className="resize-none font-mono"
-                  placeholder="Enter your email content..."
+                <label htmlFor="subject">Email Subject*</label>
+                <input
+                  id="subject"
+                  type="text"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="w-full p-2 border rounded"
+                  placeholder="Enter email subject"
+                  required
                 />
               </div>
-              
               <div className="space-y-2">
-                <label>HTML Editor</label>
+                <label>Plain Text Preview (auto-generated from HTML)</label>
+                <textarea
+                  rows={4}
+                  value={body}
+                  readOnly
+                  className="w-full p-2 resize-none border rounded font-mono bg-gray-100"
+                />
+              </div>
+              <div className="space-y-2">
+                <label>HTML Editor*</label>
                 <div className="border rounded-lg overflow-hidden">
                   <MonacoEditor
                     language="html"
                     theme="vs-light"
                     value={htmlTemplate}
-                    onChange={handleHtmlChange}
+                    onChange={setHtmlTemplate}
                     options={{
                       automaticLayout: true,
                       minimap: { enabled: false },
@@ -151,7 +209,7 @@ function SendMail() {
             </CardContent>
           </Card>
 
-          {/* Preview Section */}
+          {/* Preview */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -172,11 +230,18 @@ function SendMail() {
             </CardContent>
           </Card>
         </div>
-        <div className='mb-6'></div>
-        <Button onClick={handleSubmit} disabled={isSaving} className=" bg-primaryButton hover:bg-primaryButton" >
-              <FiSave className="mr-2 h-4 w-4" />
-              {isSaving ? 'Saving...' : 'Send Email'}
-            </Button>
+
+        {/* Submit Button */}
+        <div className="mt-6">
+          <Button 
+            onClick={handleSubmit} 
+            disabled={isSaving || !subject || !htmlTemplate || !projectId} 
+            className="bg-primaryButton hover:bg-primaryButton"
+          >
+            <FiSave className="mr-2 h-4 w-4" />
+            {isSaving ? 'Sending...' : 'Send Email'}
+          </Button>
+        </div>
       </div>
     </div>
   );
