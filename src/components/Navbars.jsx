@@ -104,7 +104,7 @@ function Navbars() {
         {/* Mobile Menu */}
         <div className="flex w-full items-center justify-between px-4 py-2 md:hidden">
             {/* Logo */}
-            <Link to={isAuthenticated ? "/dashboard/home" : "/"}>
+            <Link to={isAuthenticated ? "/dashboard/projects" : "/"}>
                 <img src={logo} alt="Logo" className="h-8 sm:h-10" />
             </Link>
 
