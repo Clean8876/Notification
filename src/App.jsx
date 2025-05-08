@@ -163,9 +163,9 @@ const ProtectedRoute = ({ children, requireProject = false }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (requireProject && (!user?.user?.apps || user?.user?.apps.length === 0)) {
-    return <Navigate to="/dashboard/home" replace />;
-  }
+  // if (requireProject && (!user?.user?.apps || user?.user?.apps.length === 0)) {
+  //   return <Navigate to="/dashboard/home" replace />;
+  // }
 
   return children;
 };
@@ -173,57 +173,57 @@ const ProtectedRoute = ({ children, requireProject = false }) => {
 // Public Route Component (redirects to dashboard if authenticated)
 const PublicRoute = ({ children }) => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
-  return isAuthenticated ? <Navigate to="/dashboard" replace /> : children;
+  return isAuthenticated ? <Navigate to="/dashboard/projects" replace /> : children;
 };
 
 function App() {
-  // Add a viewport meta tag to ensure proper mobile rendering
-  React.useEffect(() => {
-    // Check if the viewport meta tag already exists
-    let viewportMeta = document.querySelector('meta[name="viewport"]');
+  // // Add a viewport meta tag to ensure proper mobile rendering
+  // React.useEffect(() => {
+  //   // Check if the viewport meta tag already exists
+  //   let viewportMeta = document.querySelector('meta[name="viewport"]');
     
-    // If it doesn't exist, create it
-    if (!viewportMeta) {
-      viewportMeta = document.createElement('meta');
-      viewportMeta.name = 'viewport';
-      document.head.appendChild(viewportMeta);
-    }
+  //   // If it doesn't exist, create it
+  //   if (!viewportMeta) {
+  //     viewportMeta = document.createElement('meta');
+  //     viewportMeta.name = 'viewport';
+  //     document.head.appendChild(viewportMeta);
+  //   }
     
-    // Set the content attribute for responsive design
-    viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+  //   // Set the content attribute for responsive design
+  //   viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
     
-    // Add a CSS rule for base font size adjustment
-    const style = document.createElement('style');
-    style.textContent = `
-      html {
-        font-size: 16px;
-      }
+  //   // Add a CSS rule for base font size adjustment
+  //   const style = document.createElement('style');
+  //   style.textContent = `
+  //     html {
+  //       font-size: 16px;
+  //     }
       
-      @media (max-width: 768px) {
-        html {
-          font-size: 14px;
-        }
-      }
+  //     @media (max-width: 768px) {
+  //       html {
+  //         font-size: 14px;
+  //       }
+  //     }
       
-      @media (max-width: 480px) {
-        html {
-          font-size: 12px;
-        }
-      }
+  //     @media (max-width: 480px) {
+  //       html {
+  //         font-size: 12px;
+  //       }
+  //     }
       
-      body {
-        margin: 0;
-        padding: 0;
-        overflow-x: hidden;
-        width: 100%;
-      }
-    `;
-    document.head.appendChild(style);
+  //     body {
+  //       margin: 0;
+  //       padding: 0;
+  //       overflow-x: hidden;
+  //       width: 100%;
+  //     }
+  //   `;
+  //   document.head.appendChild(style);
     
-    return () => {
-      // Cleanup if needed
-    };
-  }, []);
+  //   return () => {
+  //     // Cleanup if needed
+  //   };
+  // }, []);
 
   return (
     <div className="app-container w-full min-h-screen">
@@ -260,20 +260,20 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Dashboard />} />
-          <Route path='projects' element={<Card/>}/>
-          <Route path='analytics' element={<Analytics/>}/>
-          <Route path="dash" element={<Dashboard />} />
-          <Route path="sendNotification" element={<SendNotification />} />
-          <Route path="AddProject" element={<DashboardSteps />} />
-          <Route path="dashboardSteps" element={<Stepper />} />
-          <Route path='mail' element ={<SetupEmail/>}/>
-        <Route path='sendMail' element ={<SendMail/>}/>
+          <Route index element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path='projects' element={<ProtectedRoute><Card/></ProtectedRoute>}/>
+          <Route path='analytics' element={<ProtectedRoute><Analytics/></ProtectedRoute>}/>
+          <Route path="dash" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="sendNotification" element={<ProtectedRoute><SendNotification /></ProtectedRoute>} />
+          <Route path="AddProject" element={<ProtectedRoute><DashboardSteps /></ProtectedRoute>} />
+          <Route path="dashboardSteps" element={<ProtectedRoute><Stepper /></ProtectedRoute>} />
+          <Route path='mail' element ={<ProtectedRoute><SetupEmail/></ProtectedRoute>}/>
+        <Route path='sendMail' element ={<ProtectedRoute><SendMail/></ProtectedRoute>}/>
         </Route>
         
         <Route path='/' element ={<LandingPage/>}/>
-        <Route path='/Subscription' element ={<SubscriptionGate/>}/>
-        <Route path='/profile' element ={<ProfileEdit/>}/>
+        <Route path='/Subscription' element ={<ProtectedRoute><SubscriptionGate/></ProtectedRoute>}/>
+        <Route path='/profile' element ={<ProtectedRoute><ProfileEdit/></ProtectedRoute>}/>
 
         {/* Default Redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />

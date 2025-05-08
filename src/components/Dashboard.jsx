@@ -406,9 +406,7 @@ const Dashboard = () => {
       if (result.success) {
         const pendingOnly = result.data.filter(item => item.status === "pending");
         setProjects(pendingOnly);
-      } else {
-        throw new Error(result.message || 'Failed to fetch scheduled notifications');
-      }
+      } 
     } catch (error) {
       console.error('Error:', error);
       setError(error.message || 'Failed to load notifications');

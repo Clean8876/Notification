@@ -118,8 +118,9 @@ function Login() {
                 localStorage.setItem('userInfo', JSON.stringify({ email, name, token, firebaseProjects }));
                 
                 // Update Redux
+                navigate('/projects');
                 console.log('Dispatching login to Redux...');
-                navigate('projects');
+                
                 dispatch(login({
                     user: { name, email, firebaseProjects},
                     token: token
@@ -211,11 +212,11 @@ function Login() {
                         {loading ? "Signing in..." : "Sign in"}
                     </button>
                     {/* Signup Link */}
-                    <p className="mt-6 text-center text-sm text-gray-600 font-Poppins">
+                    {/* <p className="mt-6 text-center text-sm text-gray-600 font-Poppins">
                         <Link to="/signup" className="text-primaryButton hover:underline font-Poppins">
                             Create new account
                         </Link>
-                    </p>
+                    </p> */}
                 </form>
 
                 {/* Social Login Options */}
