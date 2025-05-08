@@ -127,7 +127,7 @@ function SetupEmail() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 w-full">
+    <div className="flex items-center justify-center min-h-screen  p-4 w-full">
       <div className="bg-white rounded-3xl shadow-xl border border-gray-100 max-w-4xl w-full grid md:grid-cols-2 overflow-hidden">
 
         {/* Left Column - Setup Form */}
@@ -198,10 +198,10 @@ function SetupEmail() {
           <h2 className="text-2xl font-bold mb-6">Why Setup Email?</h2>
           <ul className="space-y-5">
             {[
-              { icon: <FaBell className="text-blue-200" />, text: "Send instant notifications and alerts" },
-              { icon: <FaChartLine className="text-blue-200" />, text: "Track engagement with open/click rates" },
-              { icon: <FaUsers className="text-blue-200" />, text: "Reach your audience directly in their inbox" },
-              { icon: <FaShield className="text-blue-200" />, text: "Secure, encrypted delivery (TLS/SSL)" }
+              { icon: <FaBell className="text-white" />, text: "Send instant notifications and alerts" },
+              { icon: <FaChartLine className="text-white" />, text: "Track engagement with open/click rates" },
+              { icon: <FaUsers className="text-white" />, text: "Reach your audience directly in their inbox" },
+              { icon: <FaShield className="text-white" />, text: "Secure, encrypted delivery (TLS/SSL)" }
             ].map((item, index) => (
               <li key={index} className="flex items-start gap-3">
                 <span className="mt-1 flex-shrink-0 w-5 h-5">{item.icon}</span>
@@ -210,8 +210,8 @@ function SetupEmail() {
             ))}
           </ul>
           <div className="mt-8 p-4 bg-white/10 rounded-lg">
-            <p className="text-blue-100 font-medium">Use your own trusted SMTP for reliable delivery.</p>
-            <p className="text-blue-200 text-sm mt-1">Ensure better deliverability and control.</p>
+            <p className="text-white font-medium">Use your own trusted SMTP for reliable delivery.</p>
+            <p className="text-blue-100 text-sm mt-1">Ensure better deliverability and control.</p>
           </div>
         </div>
       </div>

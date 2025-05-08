@@ -53,6 +53,7 @@ function Navbars() {
             navigate("/");
            setMobileMenuOpen(false);
          };
+ 
          useEffect(() => {
           const fetchUserDetails = async () => {
             try {
@@ -151,7 +152,7 @@ function Navbars() {
                           <DropdownMenuSeparator  />
                           <DropdownMenuItem asChild onSelect={() => navigate('/profile')}>
                             
-                              <User className="h-4 w-4" /> Profile Settings
+                            <span><User className="h-4 w-4" /> Profile Settings</span>  
                             
                           </DropdownMenuItem>
                           <DropdownMenuSeparator /> {/* Added a separator before logout for visual distinction */}
@@ -220,10 +221,12 @@ function Navbars() {
                         <DropdownMenuContent className="w-56">
                           <DropdownMenuLabel>{user?.user?.name}</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem asChild>
-                            <Link href="/profile" className="flex items-center gap-2">
-                              <User className="h-4 w-4" /> Profile Settings
-                            </Link>
+                          <DropdownMenuItem asChild onClick={() => navigate('/profile')}>
+                            
+                          <span>
+                            <User className="h-4 w-4" /> Profile Settings
+                          </span>
+                            
                           </DropdownMenuItem>
                           <DropdownMenuSeparator /> {/* Added a separator before logout for visual distinction */}
                           <DropdownMenuItem>
