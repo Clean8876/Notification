@@ -148,11 +148,11 @@ function Navbars() {
                         Demo
                       </Badge>
                     )}</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem asChild>
-                            <Link href="/profile" className="flex items-center gap-2">
+                          <DropdownMenuSeparator  />
+                          <DropdownMenuItem asChild onSelect={() => navigate('/profile')}>
+                            
                               <User className="h-4 w-4" /> Profile Settings
-                            </Link>
+                            
                           </DropdownMenuItem>
                           <DropdownMenuSeparator /> {/* Added a separator before logout for visual distinction */}
                           <DropdownMenuItem>
