@@ -71,7 +71,7 @@ function Login() {
                 }));
 
                 if (!apps || apps.length === 0) {
-                    navigate('/Home');
+                    navigate('/dashboard/projects');
                 } else {
                     navigate('/SendNotification');
                 }
@@ -119,7 +119,7 @@ function Login() {
                 
                 // Update Redux
                 console.log('Dispatching login to Redux...');
-                navigate('/dashboard/projects/');
+                navigate('projects');
                 dispatch(login({
                     user: { name, email, firebaseProjects},
                     token: token
