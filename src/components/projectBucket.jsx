@@ -79,7 +79,7 @@ function Card() {
     <main className="pt-16 md:pt-16 w-10/12">
       <div className="min-h-screen p-8 font-poppins">
         <div className="mx-auto max-w-6xl">
-          <h1 className="text-4xl font-Poppins text-gray-1000 mb-8">Your Projects</h1>
+          <h1 className="text-4xl font-Poppins text-gray-1000 mb-8 font-bold">Your Projects</h1>
           {projects.length === 0 ? (
             <motion.div
               initial={{ opacity: 0 }}

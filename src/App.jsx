@@ -146,7 +146,7 @@ import JsonUpload from './components/JsonUpload';
 import Stepper from './components/Stepper';
 import DashboardSteps from './components/DashboardSteps';
 import showProject from './Pages/showProject';
-import Card from './components/Bucket';
+import Card from './components/projectBucket';
 import SetupEmail from './Pages/SetupEmail';
 import SendMail from './Pages/SendMail';
 import LandingPage from './Pages/LandingPage';

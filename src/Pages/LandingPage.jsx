@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
 import { useNavigate } from 'react-router-dom'
-import Navbar from '../components/Navbar'
 import HeroSection from '../components/landingpage/HeroSection'
 import Navbars from '../components/Navbars'
 import Placeholder from '../components/landingpage/Placeholder'
